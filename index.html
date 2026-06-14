@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Store Portfolio — Wiring Diagram</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+  }
+
+  header {
+    max-width: 900px;
+    margin: 0 auto 2.5rem;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+  }
+
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .legend-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #475569;
+    min-width: 56px;
+  }
+
+  .legend-items {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .divider {
+    width: 1px;
+    height: 14px;
+    background: #1e293b;
+  }
+
+  #diagram {
+    max-width: 900px;
+    margin: 0 auto;
+    overflow-x: auto;
+  }
+
+  svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    font-size: 11px;
+    color: #334155;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Store Portfolio</h1>
+  <p>Region → Platform → Category → Store — wiring overview</p>
+</header>
+
+<div class="legend">
+  <div class="legend-group">
+    <span class="legend-label">Region</span>
+    <div class="legend-items">
+      <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>US</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#534AB7"></span>UK</span>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="legend-group">
+    <span class="legend-label">Platform</span>
+    <div class="legend-items">
+      <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Shopify</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#993556"></span>TikTokShop</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>Amazon</span>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="legend-group">
+    <span class="legend-label">Category</span>
+    <div class="legend-items">
+      <span class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Private Label</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#D4537E"></span>Dropship</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Wholesale</span>
+    </div>
+  </div>
+</div>
+
+<div id="diagram"></div>
+
+<footer>Yorkshire Traders LLC &nbsp;·&nbsp; Store Portfolio &nbsp;·&nbsp; 2026</footer>
+
+<script>
+const stores = [
+  {name:'Tattoo Numbing Cream',    platform:'Shopify',     region:'US', category:'Private Label'},
+  {name:'Dr Care Medicated Creams',platform:'Shopify',     region:'US', category:'Private Label'},
+  {name:'The American Pet',        platform:'Shopify',     region:'US', category:'Dropship'},
+  {name:'Tattoo Numbing Cream',    platform:'Shopify',     region:'UK', category:'Private Label'},
+  {name:'Althea Skincare',         platform:'Shopify',     region:'UK', category:'Dropship'},
+  {name:'Nomor Distributors',      platform:'TikTokShop',  region:'US', category:'Wholesale'},
+  {name:'Obsidian',                platform:'TikTokShop',  region:'US', category:'Wholesale'},
+  {name:'PetStore',                platform:'TikTokShop',  region:'US', category:'Dropship'},
+  {name:'Tattoo Numbing Cream',    platform:'TikTokShop',  region:'UK', category:'Private Label'},
+  {name:'Dr Care Medicated Creams',platform:'Amazon',      region:'US', category:'Private Label'},
+];
+
+const regionColor   = { US:'#1D9E75', UK:'#534AB7' };
+const platformColor = { Shopify:'#185FA5', TikTokShop:'#993556', Amazon:'#BA7517' };
+const categoryColor = { 'Private Label':'#378ADD', 'Dropship':'#D4537E', 'Wholesale':'#EF9F27' };
+
+const regions    = ['US','UK'];
+const platforms  = ['Shopify','TikTokShop','Amazon'];
+const categories = ['Private Label','Dropship','Wholesale'];
+
+const W = 860, ROW_H = 42, PAD_TOP = 60, BOX_H = 30;
+const COL_CX = [100, 265, 440, 650];
+const BOX_W  = [90,  120, 130, 155];
+
+const sorted = [...stores].sort((a,b) => {
+  if(a.region!==b.region) return regions.indexOf(a.region)-regions.indexOf(b.region);
+  if(a.platform!==b.platform) return platforms.indexOf(a.platform)-platforms.indexOf(b.platform);
+  if(a.category!==b.category) return categories.indexOf(a.category)-categories.indexOf(b.category);
+  return a.name.localeCompare(b.name);
+});
+
+const totalH = sorted.length * ROW_H + PAD_TOP + 50;
+
+const storeNodes = sorted.map((s,i) => ({
+  ...s, id:`st${i}`, cx:COL_CX[3], y:PAD_TOP+i*ROW_H, bw:BOX_W[3]
+}));
+
+function midY(pred){ const m=storeNodes.filter(pred); return m.length ? m.reduce((a,b)=>a+b.y,0)/m.length : 0; }
+
+const usedC=new Set(), catNodes=[];
+storeNodes.forEach(s=>{ const k=`${s.region}|${s.platform}|${s.category}`; if(!usedC.has(k)){usedC.add(k);catNodes.push({id:`cat-${k}`,label:s.category,type:'category',region:s.region,platform:s.platform,category:s.category,cx:COL_CX[2],bw:BOX_W[2],y:midY(n=>n.region===s.region&&n.platform===s.platform&&n.category===s.category)});}});
+
+const usedP=new Set(), platNodes=[];
+storeNodes.forEach(s=>{ const k=`${s.region}|${s.platform}`; if(!usedP.has(k)){usedP.add(k);platNodes.push({id:`plat-${k}`,label:s.platform,type:'platform',region:s.region,platform:s.platform,cx:COL_CX[1],bw:BOX_W[1],y:midY(n=>n.region===s.region&&n.platform===s.platform)});}});
+
+const regNodes = regions.filter(r=>storeNodes.some(s=>s.region===r)).map(r=>({
+  id:`reg-${r}`, label:r==='US'?'🇺🇸  US':'🇬🇧  UK', type:'region', region:r,
+  cx:COL_CX[0], bw:BOX_W[0], y:midY(s=>s.region===r)
+}));
+
+const links=[];
+regNodes.forEach(r=> platNodes.filter(p=>p.region===r.region).forEach(p=> links.push({s:r,t:p,color:regionColor[r.region]})));
+platNodes.forEach(p=> catNodes.filter(c=>c.region===p.region&&c.platform===p.platform).forEach(c=> links.push({s:p,t:c,color:platformColor[p.platform]})));
+catNodes.forEach(c=> storeNodes.filter(s=>s.region===c.region&&s.platform===c.platform&&s.category===c.category).forEach(s=> links.push({s:c,t:s,color:categoryColor[c.category]})));
+
+const allNodes=[...regNodes,...platNodes,...catNodes,...storeNodes];
+function nodeColor(n){ if(n.type==='region') return regionColor[n.region]; if(n.type==='platform') return platformColor[n.platform]; if(n.type==='category') return categoryColor[n.category]; return platformColor[n.platform]; }
+
+const svg = d3.select('#diagram').append('svg')
+  .attr('width','100%').attr('height',totalH)
+  .attr('viewBox',`0 0 ${W} ${totalH}`);
+
+const colHeaders = ['Region','Platform','Category','Store Name'];
+colHeaders.forEach((h,i)=>{
+  svg.append('text')
+    .attr('x',COL_CX[i]).attr('y',22)
+    .attr('text-anchor','middle')
+    .attr('font-size','10px').attr('font-weight','600')
+    .attr('fill','#475569')
+    .attr('letter-spacing','0.08em')
+    .text(h.toUpperCase());
+  svg.append('line')
+    .attr('x1',COL_CX[i]-BOX_W[i]/2).attr('y1',30)
+    .attr('x2',COL_CX[i]+BOX_W[i]/2).attr('y2',30)
+    .attr('stroke','#1e293b').attr('stroke-width','1');
+});
+
+links.forEach(l=>{
+  const x1=l.s.cx+l.s.bw/2, y1=l.s.y+BOX_H/2;
+  const x2=l.t.cx-l.t.bw/2, y2=l.t.y+BOX_H/2;
+  const mx=(x1+x2)/2;
+  svg.append('path')
+    .attr('d',`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`)
+    .attr('fill','none').attr('stroke',l.color)
+    .attr('stroke-width',1.5).attr('opacity',0.25)
+    .attr('stroke-linecap','round');
+  svg.append('circle').attr('cx',x1).attr('cy',y1).attr('r',2.5).attr('fill',l.color).attr('opacity',0.5);
+  svg.append('circle').attr('cx',x2).attr('cy',y2).attr('r',2.5).attr('fill',l.color).attr('opacity',0.5);
+});
+
+allNodes.forEach(n=>{
+  const col=nodeColor(n), x=n.cx-n.bw/2, y=n.y;
+  svg.append('rect').attr('x',x).attr('y',y).attr('width',n.bw).attr('height',BOX_H).attr('rx',6)
+    .attr('fill',col).attr('opacity',n.type==='store'?0.07:0.13);
+  svg.append('rect').attr('x',x).attr('y',y).attr('width',n.bw).attr('height',BOX_H).attr('rx',6)
+    .attr('fill','none').attr('stroke',col).attr('stroke-width',n.type==='store'?0.8:1.4).attr('opacity',n.type==='store'?0.4:0.9);
+  svg.append('rect').attr('x',x).attr('y',y).attr('width',4).attr('height',BOX_H).attr('rx',3)
+    .attr('fill',col).attr('opacity',n.type==='store'?0.35:0.85);
+  const raw=n.label||n.name||'';
+  const maxC=Math.floor(n.bw/6.5);
+  const label=raw.length>maxC?raw.slice(0,maxC-1)+'…':raw;
+  svg.append('text')
+    .attr('x',x+10).attr('y',y+BOX_H/2+4)
+    .attr('font-size',n.type==='store'?'10px':'10.5px')
+    .attr('font-weight',n.type==='store'?'400':'500')
+    .attr('fill',col).attr('opacity',n.type==='store'?0.8:1)
+    .text(label);
+});
+</script>
+</body>
+</html>
