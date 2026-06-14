@@ -10,8 +10,8 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
+    background: #f8fafc;
+    color: #1e293b;
     min-height: 100vh;
     padding: 2rem 1.5rem;
   }
@@ -24,13 +24,13 @@
   header h1 {
     font-size: 22px;
     font-weight: 500;
-    color: #f1f5f9;
+    color: #0f172a;
     margin-bottom: 4px;
   }
 
   header p {
     font-size: 13px;
-    color: #64748b;
+    color: #94a3b8;
   }
 
   .legend {
@@ -52,7 +52,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #475569;
+    color: #94a3b8;
     min-width: 56px;
   }
 
@@ -67,7 +67,7 @@
     align-items: center;
     gap: 5px;
     font-size: 11px;
-    color: #94a3b8;
+    color: #64748b;
   }
 
   .legend-dot {
@@ -80,7 +80,7 @@
   .divider {
     width: 1px;
     height: 14px;
-    background: #1e293b;
+    background: #e2e8f0;
   }
 
   #diagram {
@@ -90,13 +90,6 @@
   }
 
   svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-  footer {
-    text-align: center;
-    margin-top: 3rem;
-    font-size: 11px;
-    color: #334155;
-  }
 </style>
 </head>
 <body>
@@ -135,8 +128,6 @@
 </div>
 
 <div id="diagram"></div>
-
-<footer>Yorkshire Traders LLC &nbsp;·&nbsp; Store Portfolio &nbsp;·&nbsp; 2026</footer>
 
 <script>
 const stores = [
@@ -208,13 +199,13 @@ colHeaders.forEach((h,i)=>{
     .attr('x',COL_CX[i]).attr('y',22)
     .attr('text-anchor','middle')
     .attr('font-size','10px').attr('font-weight','600')
-    .attr('fill','#475569')
+    .attr('fill','#94a3b8')
     .attr('letter-spacing','0.08em')
     .text(h.toUpperCase());
   svg.append('line')
     .attr('x1',COL_CX[i]-BOX_W[i]/2).attr('y1',30)
     .attr('x2',COL_CX[i]+BOX_W[i]/2).attr('y2',30)
-    .attr('stroke','#1e293b').attr('stroke-width','1');
+    .attr('stroke','#e2e8f0').attr('stroke-width','1');
 });
 
 links.forEach(l=>{
@@ -224,20 +215,20 @@ links.forEach(l=>{
   svg.append('path')
     .attr('d',`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`)
     .attr('fill','none').attr('stroke',l.color)
-    .attr('stroke-width',1.5).attr('opacity',0.25)
+    .attr('stroke-width',1.5).attr('opacity',0.3)
     .attr('stroke-linecap','round');
-  svg.append('circle').attr('cx',x1).attr('cy',y1).attr('r',2.5).attr('fill',l.color).attr('opacity',0.5);
-  svg.append('circle').attr('cx',x2).attr('cy',y2).attr('r',2.5).attr('fill',l.color).attr('opacity',0.5);
+  svg.append('circle').attr('cx',x1).attr('cy',y1).attr('r',2.5).attr('fill',l.color).attr('opacity',0.55);
+  svg.append('circle').attr('cx',x2).attr('cy',y2).attr('r',2.5).attr('fill',l.color).attr('opacity',0.55);
 });
 
 allNodes.forEach(n=>{
   const col=nodeColor(n), x=n.cx-n.bw/2, y=n.y;
   svg.append('rect').attr('x',x).attr('y',y).attr('width',n.bw).attr('height',BOX_H).attr('rx',6)
-    .attr('fill',col).attr('opacity',n.type==='store'?0.07:0.13);
+    .attr('fill',col).attr('opacity',n.type==='store'?0.06:0.1);
   svg.append('rect').attr('x',x).attr('y',y).attr('width',n.bw).attr('height',BOX_H).attr('rx',6)
-    .attr('fill','none').attr('stroke',col).attr('stroke-width',n.type==='store'?0.8:1.4).attr('opacity',n.type==='store'?0.4:0.9);
+    .attr('fill','none').attr('stroke',col).attr('stroke-width',n.type==='store'?0.8:1.4).attr('opacity',n.type==='store'?0.35:0.85);
   svg.append('rect').attr('x',x).attr('y',y).attr('width',4).attr('height',BOX_H).attr('rx',3)
-    .attr('fill',col).attr('opacity',n.type==='store'?0.35:0.85);
+    .attr('fill',col).attr('opacity',n.type==='store'?0.3:0.8);
   const raw=n.label||n.name||'';
   const maxC=Math.floor(n.bw/6.5);
   const label=raw.length>maxC?raw.slice(0,maxC-1)+'…':raw;
@@ -245,7 +236,7 @@ allNodes.forEach(n=>{
     .attr('x',x+10).attr('y',y+BOX_H/2+4)
     .attr('font-size',n.type==='store'?'10px':'10.5px')
     .attr('font-weight',n.type==='store'?'400':'500')
-    .attr('fill',col).attr('opacity',n.type==='store'?0.8:1)
+    .attr('fill',col).attr('opacity',n.type==='store'?0.75:1)
     .text(label);
 });
 </script>
